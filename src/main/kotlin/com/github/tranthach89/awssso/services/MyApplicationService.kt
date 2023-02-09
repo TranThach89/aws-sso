@@ -1,6 +1,6 @@
-package org.jetbrains.plugins.template.services
+package com.github.tranthach89.awssso.services
 
-import org.jetbrains.plugins.template.MyBundle
+import com.github.tranthach89.awssso.MyBundle
 
 class MyApplicationService {
 
