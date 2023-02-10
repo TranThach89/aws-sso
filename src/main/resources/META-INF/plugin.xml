@@ -1,18 +1,16 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.github.tranthach89.awssso</id>
-    <name>IntelliJ Platform Plugin aws-sso</name>
+    <name>Aws sso Layout</name>
     <vendor>tranthach89</vendor>
 
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.tranthach89.awssso.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.tranthach89.awssso.services.MyProjectService"/>
+        <toolWindow id="aws-sso" anchor="right"
+                    factoryClass="com.github.tranthach89.awssso.services.AwsSsoLayoutService"
+                    icon="/images/aws-sso.svg"
+        />
+        <notificationGroup displayType="BALLOON" id="aws sso"/>
     </extensions>
-
-    <applicationListeners>
-        <listener class="com.github.tranthach89.awssso.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
 </idea-plugin>
