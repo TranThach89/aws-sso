@@ -1,40 +1,49 @@
 package com.github.tranthach89.awssso.services
 
+import com.github.tranthach89.awssso.actions.AddProfileAction
+import com.github.tranthach89.awssso.actions.BuyMeCoffee
+import com.github.tranthach89.awssso.actions.ShowHelpAction
+import com.github.tranthach89.awssso.helper.Icons.addPluginIcon
+import com.github.tranthach89.awssso.helper.notify
+import com.github.tranthach89.awssso.helper.shellCommand
+import com.github.tranthach89.awssso.models.Profile
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.ActionPlaces
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.DefaultActionGroup
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.wm.ToolWindowFactory
+import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.SimpleToolWindowPanel
 import com.intellij.openapi.wm.ToolWindow
+import com.intellij.openapi.wm.ToolWindowFactory
 import com.intellij.ui.ScrollPaneFactory
 import com.intellij.ui.content.Content
 import com.intellij.ui.content.ContentFactory
-import com.intellij.openapi.project.DumbAware
-import com.intellij.openapi.ui.SimpleToolWindowPanel
+import com.intellij.ui.dsl.builder.panel
 import java.awt.GridLayout
+import javax.swing.Icon
+import com.github.tranthach89.awssso.models.awsCli
 import javax.swing.JComponent
 import javax.swing.JPanel
-import com.intellij.openapi.actionSystem.*
-import javax.swing.Icon
-import com.github.tranthach89.awssso.actions.ShowHelpAction
-import com.github.tranthach89.awssso.actions.BuyMeCoffee
-import com.github.tranthach89.awssso.actions.AddProfileAction
-import com.github.tranthach89.awssso.helper.Icons.addPluginIcon
 
 class AwsSsoLayoutService: ToolWindowFactory, DumbAware {
     override fun createToolWindowContent(project: Project, toolWindow: ToolWindow) {
-        toolWindow.contentManager.addContent(PluginToolWindow().createContent())
+        toolWindow.contentManager.addContent(PluginToolWindow(project).createContent())
     }
 }
 
-private class PluginToolWindow() {
-//    private val fileSystemTree = createManageScreen(project)
+class PluginToolWindow(project: Project) {
+    private val myTree = createManageScreen(project)
+
     fun createContent(): Content {
         val panel = SimpleToolWindowPanel(true).also {
-            it.add(ScrollPaneFactory.createScrollPane())
+            it.add(ScrollPaneFactory.createScrollPane(myTree))
             it.toolbar = createToolBar()
         }
 
         return ApplicationManager.getApplication().getService(ContentFactory::class.java)
-                .createContent(panel, "", false)
+                .createContent(panel, "manager", false)
     }
 
     private fun createToolBar(): JComponent {
@@ -42,7 +51,6 @@ private class PluginToolWindow() {
 
         val actionGroup = DefaultActionGroup().apply {
             add(DefaultActionGroup("Add", true).apply {
-//                add(CreateGroupAction())
                 add(AddProfileAction())
             }.with(addPluginIcon))
             add(ShowHelpAction())
@@ -61,16 +69,30 @@ private class PluginToolWindow() {
         }
     }
 
-//    private fun createManageScreen(project: Project): FileSystemTree {
-//        val myTree = MyTree(project)
-//        EditSourceOnDoubleClickHandler.install(myTree) // This handler only seems to work before creating FileSystemTreeImpl.
-//
-//        val fileSystemTree = FileSystemTreeImpl(project, createFileChooserDescriptor(), myTree, null, null, null)
-//        Disposer.register(project, fileSystemTree)
-//        fileSystemTree.tree.let {
-//            EditSourceOnEnterKeyHandler.install(it) // This handler only seems to work after creating FileSystemTreeImpl.
-//            it.installPopupMenu()
-//        }
-//        return fileSystemTree
-//    }
+    private fun createManageScreen(project: Project): JPanel {
+        val listProfile = Profile.getInstance(project)
+        println("============   createManageScreen  ============")
+
+        if (listProfile.profileName.isEmpty()) {
+            val myTree = panel { row { label("No Profile. Please add") } }
+            return myTree
+        } else {
+            val myTree = panel {
+                listProfile.profileName.split(",").forEach {
+                    row {
+                        button(it) {
+                            notify(it.toString())
+                            println(it)
+                            shellCommand(awsCli(), "sso", "login", "--profile", it.actionCommand)
+                        }
+                    }
+                }
+            }
+            return myTree
+        }
+    }
+}
+
+class AwsCliNotPound {
+
 }

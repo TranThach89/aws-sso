@@ -2,15 +2,12 @@ package com.github.tranthach89.awssso.actions.profile
 
 import com.github.tranthach89.awssso.helper.notify
 import com.github.tranthach89.awssso.models.Profile
-import com.intellij.execution.ui.ExecutionConsole
-import com.intellij.openapi.actionSystem.ActionGroup
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.project.DumbAware
-import com.intellij.ui.dsl.builder.panel
-import java.awt.BorderLayout
-import javax.swing.JPanel
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.wm.RegisterToolWindowTask
+import com.intellij.openapi.wm.ToolWindowManager
+import com.github.tranthach89.awssso.services.PluginToolWindow
 
 class ShowProfileAction(private val profile: Profile): AnAction(), DumbAware {
     init {
@@ -18,35 +15,49 @@ class ShowProfileAction(private val profile: Profile): AnAction(), DumbAware {
     }
 
     override fun actionPerformed(event: AnActionEvent) {
-//        val project = event.project
-        notify("Hello...")
+        val project = event.getRequiredData(CommonDataKeys.PROJECT)
+        val toolWindowManager = ToolWindowManager.getInstance(project)
+        var toolWindow = toolWindowManager.getToolWindow(ID)
 
-        panel {
-            row("Row1 label:") {
-                textField()
-                label("Some text")
-            }
-
-            row("Row2:") {
-                label("This text is aligned with previous row")
-            }
+        if (toolWindow == null) {
+            toolWindow = toolWindowManager.registerToolWindow(
+                    RegisterToolWindowTask(
+                            id = ID,
+                            component = null,
+                            canCloseContent = true,
+                    ))
+            toolWindow.setToHideOnEmptyContent(true)
         }
+
+        val contentManager = toolWindow.contentManager
+        val content = toolWindow.contentManager.getContent(0)
+
+        if (content != null) {
+            contentManager.removeContent(content, true)
+        }
+
+        val profile1 = Profile.getInstance(project)
+//        val profile2 = profile1.profileName.add(Profile(profile.profileName))
+        val profile2 = Profile(profile1.profileName + "," + profile.profileName)
+        println("Save ===============")
+        profile1.loadState(profile2)
+        notify("Add Success")
+        toolWindow.contentManager.addContent(PluginToolWindow(project).createContent())
+//        notify(profile1)
+//        notify(profile2)
     }
 
     override fun update(event: AnActionEvent) {
+        // Todo check profile is add
+//        notify("update")
+//        notify(profile.profileName)
 //        val alreadyAdded = livePluginsById().containsKey(profile.pluginId)
 //        event.presentation.isEnabled = !alreadyAdded
+        val currentProject: Project? = event.project
+        event.presentation.isEnabledAndVisible = currentProject != null
     }
-}
 
-private class MyConsolePanel(consoleView: ExecutionConsole, toolbarActions: ActionGroup) : JPanel(BorderLayout()) {
-    init {
-        val toolbarPanel = JPanel(BorderLayout()).also {
-            val actionToolbar = ActionManager.getInstance().createActionToolbar("aws sso", toolbarActions, false)
-            actionToolbar.targetComponent = this
-            it.add(actionToolbar.component)
-        }
-        add(toolbarPanel, BorderLayout.WEST)
-        add(consoleView.component, BorderLayout.CENTER)
+    companion object {
+        const val ID = "aws-sso"
     }
 }

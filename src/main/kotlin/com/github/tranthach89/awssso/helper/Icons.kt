@@ -17,6 +17,6 @@ object Icons {
     val collapseAllIcon = Actions.Collapseall
     val settingsIcon = General.GearPlain
     val helpIcon = Actions.Help
-    val donateIcon = CustomIcon().donate()
+//    val donateIcon = CustomIcon().donate()
     val newFolderIcon = Nodes.Folder
 }

@@ -11,6 +11,6 @@
                     factoryClass="com.github.tranthach89.awssso.services.AwsSsoLayoutService"
                     icon="/images/aws-sso.svg"
         />
-        <notificationGroup displayType="BALLOON" id="aws sso"/>
+        <projectService serviceImplementation="com.github.tranthach89.awssso.models.Profile"/>
     </extensions>
 </idea-plugin>

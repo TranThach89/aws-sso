@@ -8,6 +8,7 @@ class AddProfileAction: DefaultActionGroup("Add profile", true) {
     init {
         ListProfileAction().forEach {
             add(ShowProfileAction(it))
+            addSeparator()
         }
         addSeparator()
     }
