@@ -2,3 +2,6 @@
 .idea
 .qodana
 build
+.run
+.DS_Store
+verifier-all.jar

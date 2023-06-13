@@ -79,11 +79,13 @@ class PluginToolWindow(project: Project) {
         } else {
             val myTree = panel {
                 listProfile.profileName.split(",").forEach {
-                    row {
-                        button(it) {
-                            notify(it.toString())
-                            println(it)
-                            shellCommand(awsCli(), "sso", "login", "--profile", it.actionCommand)
+                    if (it.isNotEmpty()) {
+                        row {
+                            button(it) {
+                                notify(it.toString())
+                                println(it)
+                                shellCommand(awsCli(), "sso", "login", "--profile", it.actionCommand)
+                            }
                         }
                     }
                 }
